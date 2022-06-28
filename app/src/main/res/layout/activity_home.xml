@@ -6,7 +6,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="16dp">
 
@@ -21,7 +21,9 @@
             android:id="@+id/func"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:nestedScrollingEnabled="false"
+            android:overScrollMode="never" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -35,27 +37,29 @@
             android:id="@+id/recent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:nestedScrollingEnabled="false" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/home_update"
+            android:text="@string/home_recommend"
             android:textColor="@color/white"
             android:textSize="24sp" />
 
-        <com.github.androidprogresslayout.ProgressLayout
-            android:id="@+id/updateLayout"
+        <com.fongmi.bear.ui.custom.ProgressLayout
+            android:id="@+id/progress"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="16dp">
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/update"
+                android:id="@+id/recommend"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:nestedScrollingEnabled="false" />
 
-        </com.github.androidprogresslayout.ProgressLayout>
+        </com.fongmi.bear.ui.custom.ProgressLayout>
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
