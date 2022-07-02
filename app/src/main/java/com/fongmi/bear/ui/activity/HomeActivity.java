@@ -4,26 +4,34 @@ import android.app.Activity;
 import android.content.Intent;
 
 import androidx.annotation.Nullable;
+import androidx.leanback.widget.ArrayObjectAdapter;
+import androidx.leanback.widget.ItemBridgeAdapter;
+import androidx.leanback.widget.ListRow;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewbinding.ViewBinding;
 
 import com.fongmi.bear.R;
 import com.fongmi.bear.bean.Func;
 import com.fongmi.bear.bean.Result;
+import com.fongmi.bear.bean.Vod;
 import com.fongmi.bear.databinding.ActivityHomeBinding;
 import com.fongmi.bear.model.SiteViewModel;
-import com.fongmi.bear.ui.adapter.FuncAdapter;
-import com.fongmi.bear.ui.adapter.VodAdapter;
-import com.fongmi.bear.ui.custom.SpaceItemDecoration;
+import com.fongmi.bear.ui.custom.CustomRowPresenter;
+import com.fongmi.bear.ui.custom.CustomSelector;
+import com.fongmi.bear.ui.presenter.FuncPresenter;
+import com.fongmi.bear.ui.presenter.ProgressPresenter;
+import com.fongmi.bear.ui.presenter.TitlePresenter;
+import com.fongmi.bear.ui.presenter.VodPresenter;
+import com.fongmi.bear.utils.ResUtil;
+
+import java.util.List;
 
 public class HomeActivity extends BaseActivity {
 
     private ActivityHomeBinding mBinding;
     private SiteViewModel mSiteViewModel;
-    private FuncAdapter mFuncAdapter;
-    private VodAdapter mVodAdapter;
+    private FuncPresenter mFuncPresenter;
+    private ArrayObjectAdapter mAdapter;
 
     public static void start(Activity activity) {
         activity.startActivity(new Intent(activity, HomeActivity.class));
@@ -39,35 +47,58 @@ public class HomeActivity extends BaseActivity {
     protected void initView() {
         setRecyclerView();
         setViewModel();
-        getContent();
+        setAdapter();
+        getVideo();
     }
 
     @Override
     protected void initEvent() {
-        mFuncAdapter.setOnItemClickListener(this::onFuncClick);
+        mFuncPresenter.setOnClickListener(this::onFuncClick);
     }
 
     private void setRecyclerView() {
-        mBinding.func.setHasFixedSize(true);
-        mBinding.func.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        mBinding.func.setAdapter(mFuncAdapter = new FuncAdapter());
-        mBinding.recommend.setHasFixedSize(true);
-        mBinding.recommend.setLayoutManager(new GridLayoutManager(this, 5));
-        mBinding.recommend.addItemDecoration(new SpaceItemDecoration(5, 12, false, 0));
-        mBinding.recommend.setAdapter(mVodAdapter = new VodAdapter());
+        CustomSelector selector = new CustomSelector();
+        selector.addPresenter(Integer.class, new TitlePresenter());
+        selector.addPresenter(String.class, new ProgressPresenter());
+        selector.addPresenter(ListRow.class, new CustomRowPresenter(16), VodPresenter.class);
+        selector.addPresenter(ListRow.class, new CustomRowPresenter(16), FuncPresenter.class);
+        mBinding.recycler.setVerticalSpacing(ResUtil.dp2px(16));
+        mBinding.recycler.setAdapter(new ItemBridgeAdapter(mAdapter = new ArrayObjectAdapter(selector)));
     }
 
     private void setViewModel() {
         mSiteViewModel = new ViewModelProvider(this).get(SiteViewModel.class);
         mSiteViewModel.mResult.observe(this, result -> {
-            mVodAdapter.addAll(result.getList());
-            mBinding.progress.showContent();
+            mAdapter.remove("progress");
+            for (List<Vod> items : result.partition()) {
+                ArrayObjectAdapter adapter = new ArrayObjectAdapter(new VodPresenter(items.size()));
+                adapter.addAll(0, items);
+                mAdapter.add(new ListRow(adapter));
+            }
         });
     }
 
-    private void getContent() {
-        mBinding.progress.showProgress();
+    private void setAdapter() {
+        mAdapter.add(R.string.app_name);
+        mAdapter.add(getFuncRow());
+        mAdapter.add(R.string.home_recent);
+        mAdapter.add(R.string.home_recommend);
+    }
+
+    private void getVideo() {
+        if (mAdapter.size() > 4) mAdapter.removeItems(4, mAdapter.size() - 4);
         mSiteViewModel.homeContent();
+        mAdapter.add("progress");
+    }
+
+    private ListRow getFuncRow() {
+        ArrayObjectAdapter adapter = new ArrayObjectAdapter(mFuncPresenter = new FuncPresenter());
+        adapter.add(Func.create(R.string.home_vod));
+        adapter.add(Func.create(R.string.home_live));
+        adapter.add(Func.create(R.string.home_search));
+        adapter.add(Func.create(R.string.home_push));
+        adapter.add(Func.create(R.string.home_setting));
+        return new ListRow(adapter);
     }
 
     private void onFuncClick(Func item) {
@@ -86,6 +117,6 @@ public class HomeActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != RESULT_OK) return;
-        getContent();
+        getVideo();
     }
 }
