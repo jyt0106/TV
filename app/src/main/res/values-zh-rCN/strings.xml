@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:xliff="http://schemas.android.com/apk/res-auto">
 
     <!-- App -->
     <string name="app_name">熊爱影视</string>
@@ -15,6 +15,15 @@
     <string name="home_recent">最近观看</string>
     <string name="home_recommend">更新推荐</string>
 
+    <!-- Detail -->
+    <string name="detail_site">站源：<xliff:g name="name">%s</xliff:g></string>
+    <string name="detail_year">年份：<xliff:g name="name">%s</xliff:g></string>
+    <string name="detail_area">地区：<xliff:g name="name">%s</xliff:g></string>
+    <string name="detail_type">类型：<xliff:g name="name">%s</xliff:g></string>
+    <string name="detail_director">导演：<xliff:g name="name">%s</xliff:g></string>
+    <string name="detail_actor">演员：<xliff:g name="name">%s</xliff:g></string>
+    <string name="detail_content">简介：<xliff:g name="name">%s</xliff:g></string>
+
     <!-- Setting -->
     <string name="setting_site">首页</string>
     <string name="setting_url">配置</string>
@@ -26,6 +35,7 @@
     <string name="dialog_config_url_hint">请输入配置接口</string>
 
     <!-- Error -->
-    <string name="error_config">配置载入失败</string>
+    <string name="error_config_get">配置取得失败</string>
+    <string name="error_config_parse">配置解析失败</string>
 
 </resources>

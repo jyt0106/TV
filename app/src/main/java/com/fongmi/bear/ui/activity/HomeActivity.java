@@ -10,6 +10,7 @@ import androidx.leanback.widget.ListRow;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewbinding.ViewBinding;
 
+import com.fongmi.bear.ApiConfig;
 import com.fongmi.bear.R;
 import com.fongmi.bear.bean.Func;
 import com.fongmi.bear.bean.Result;
@@ -26,7 +27,7 @@ import com.fongmi.bear.utils.ResUtil;
 
 import java.util.List;
 
-public class HomeActivity extends BaseActivity {
+public class HomeActivity extends BaseActivity implements VodPresenter.OnClickListener {
 
     private ActivityHomeBinding mBinding;
     private SiteViewModel mSiteViewModel;
@@ -68,10 +69,12 @@ public class HomeActivity extends BaseActivity {
 
     private void setViewModel() {
         mSiteViewModel = new ViewModelProvider(this).get(SiteViewModel.class);
-        mSiteViewModel.mResult.observe(this, result -> {
+        mSiteViewModel.result.observe(this, result -> {
             mAdapter.remove("progress");
             for (List<Vod> items : result.partition()) {
-                ArrayObjectAdapter adapter = new ArrayObjectAdapter(new VodPresenter(items.size()));
+                VodPresenter presenter = new VodPresenter(items.size());
+                ArrayObjectAdapter adapter = new ArrayObjectAdapter(presenter);
+                presenter.setOnClickListener(this);
                 adapter.addAll(0, items);
                 mAdapter.add(new ListRow(adapter));
             }
@@ -87,6 +90,7 @@ public class HomeActivity extends BaseActivity {
 
     private void getVideo() {
         if (mAdapter.size() > 4) mAdapter.removeItems(4, mAdapter.size() - 4);
+        if (ApiConfig.get().getHome().getKey().isEmpty()) return;
         mSiteViewModel.homeContent();
         mAdapter.add("progress");
     }
@@ -105,12 +109,17 @@ public class HomeActivity extends BaseActivity {
         switch (item.getResId()) {
             case R.string.home_vod:
                 Result result = mSiteViewModel.getResult().getValue();
-                if (result != null) VodActivity.start(this, result);
+                VodActivity.start(this, result);
                 break;
             case R.string.home_setting:
                 SettingActivity.start(this);
                 break;
         }
+    }
+
+    @Override
+    public void onItemClick(Vod item) {
+        DetailActivity.start(getActivity(), item.getVodId());
     }
 
     @Override

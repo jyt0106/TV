@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:xliff="http://schemas.android.com/apk/res-auto">
 
     <!-- App -->
     <string name="app_name">BearTV</string>
@@ -15,6 +15,15 @@
     <string name="home_recent">Recent</string>
     <string name="home_recommend">Recommend</string>
 
+    <!-- Detail -->
+    <string name="detail_site">Site: <xliff:g name="name">%s</xliff:g></string>
+    <string name="detail_year">Year: <xliff:g name="name">%s</xliff:g></string>
+    <string name="detail_area">Area: <xliff:g name="name">%s</xliff:g></string>
+    <string name="detail_type">Type: <xliff:g name="name">%s</xliff:g></string>
+    <string name="detail_director">Director: <xliff:g name="name">%s</xliff:g></string>
+    <string name="detail_actor">Actor: <xliff:g name="name">%s</xliff:g></string>
+    <string name="detail_content">Summary: <xliff:g name="name">%s</xliff:g></string>
+
     <!-- Setting -->
     <string name="setting_site">Home site</string>
     <string name="setting_url">Configure</string>
@@ -26,6 +35,7 @@
     <string name="dialog_config_url_hint">Please enter the configuration url</string>
 
     <!-- Error -->
-    <string name="error_config">Configuration load failed</string>
+    <string name="error_config_get">Configuration get failed</string>
+    <string name="error_config_parse">Configuration parse failed</string>
 
 </resources>

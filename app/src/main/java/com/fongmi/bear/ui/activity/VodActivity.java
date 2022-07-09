@@ -35,6 +35,7 @@ public class VodActivity extends BaseActivity {
     }
 
     public static void start(Activity activity, Result result) {
+        if (result == null || result.getTypes().isEmpty()) return;
         Intent intent = new Intent(activity, VodActivity.class);
         intent.putExtra("result", result.toString());
         activity.startActivity(intent);
@@ -65,9 +66,10 @@ public class VodActivity extends BaseActivity {
             @Override
             public void onChildViewHolderSelected(@NonNull RecyclerView parent, @Nullable RecyclerView.ViewHolder child, int position, int subposition) {
                 mBinding.pager.setCurrentItem(position);
-                if (mOldView != null) mOldView.setSelected(false);
+                if (mOldView != null) mOldView.setActivated(false);
+                if (child == null) return;
                 mOldView = child.itemView;
-                mOldView.setSelected(true);
+                mOldView.setActivated(true);
             }
         });
     }
@@ -77,7 +79,8 @@ public class VodActivity extends BaseActivity {
         mBinding.recycler.setRowHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
         ArrayObjectAdapter adapter = new ArrayObjectAdapter(mTypePresenter = new TypePresenter());
         adapter.addAll(0, mResult.getTypes());
-        mBinding.recycler.setAdapter(new ItemBridgeAdapter(adapter));
+        ItemBridgeAdapter bridgeAdapter = new ItemBridgeAdapter(adapter);
+        mBinding.recycler.setAdapter(bridgeAdapter);
     }
 
     private void setPager() {
@@ -88,7 +91,7 @@ public class VodActivity extends BaseActivity {
     class PageAdapter extends FragmentStatePagerAdapter {
 
         public PageAdapter(@NonNull FragmentManager fm) {
-            super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+            super(fm);
         }
 
         @NonNull
