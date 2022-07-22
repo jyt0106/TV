@@ -17,7 +17,6 @@ import com.fongmi.bear.bean.Result;
 import com.fongmi.bear.bean.Vod;
 import com.fongmi.bear.databinding.ActivityHomeBinding;
 import com.fongmi.bear.model.SiteViewModel;
-import com.fongmi.bear.player.Players;
 import com.fongmi.bear.ui.custom.CustomRowPresenter;
 import com.fongmi.bear.ui.custom.CustomSelector;
 import com.fongmi.bear.ui.presenter.FuncPresenter;
@@ -126,13 +125,6 @@ public class HomeActivity extends BaseActivity implements VodPresenter.OnClickLi
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode != RESULT_OK) return;
-        getVideo();
-    }
-
-    @Override
-    protected void onDestroy() {
-        Players.get().release();
-        super.onDestroy();
+        if (resultCode == RESULT_OK) getVideo();
     }
 }
