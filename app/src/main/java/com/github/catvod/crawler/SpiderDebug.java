@@ -14,7 +14,7 @@ public class SpiderDebug {
         Logger.t(TAG).d(msg);
     }
 
-    public static void json(String msg) {
-        Logger.t(TAG).json(msg);
+    public static void xml(String msg) {
+        Logger.t(TAG).xml(msg);
     }
 }
