@@ -51,7 +51,7 @@
                 android:textColor="@color/white" />
 
             <TextView
-                android:id="@+id/replay"
+                android:id="@+id/reset"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
@@ -78,7 +78,7 @@
                 android:focusable="true"
                 android:focusableInTouchMode="true"
                 android:textColor="@color/white"
-                tools:text="1.0" />
+                tools:text="1.00" />
 
             <TextView
                 android:layout_width="wrap_content"

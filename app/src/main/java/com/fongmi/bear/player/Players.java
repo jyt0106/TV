@@ -8,19 +8,25 @@ import com.fongmi.bear.event.PlayerEvent;
 import com.fongmi.bear.ui.custom.CustomWebView;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.util.Util;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Formatter;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class Players implements Player.Listener {
 
-    private final CustomWebView webView;
-    private final ExoPlayer exoPlayer;
-    private final Handler handler;
+    private CustomWebView webView;
+    private StringBuilder builder;
+    private Formatter formatter;
+    private ExoPlayer exoPlayer;
+    private Handler handler;
 
     private static class Loader {
         static volatile Players INSTANCE = new Players();
@@ -30,10 +36,12 @@ public class Players implements Player.Listener {
         return Loader.INSTANCE;
     }
 
-    public Players() {
+    public void init() {
+        builder = new StringBuilder();
         webView = new CustomWebView(App.get());
         handler = new Handler(Looper.getMainLooper());
         exoPlayer = new ExoPlayer.Builder(App.get()).build();
+        formatter = new Formatter(builder, Locale.getDefault());
         exoPlayer.addListener(this);
     }
 
@@ -42,17 +50,26 @@ public class Players implements Player.Listener {
     }
 
     public String getSpeed() {
-        return String.valueOf(exoPlayer.getPlaybackParameters().speed);
+        return String.format(Locale.getDefault(), "%.2f", exoPlayer.getPlaybackParameters().speed);
     }
 
     public String addSpeed() {
         float speed = exoPlayer.getPlaybackParameters().speed;
-        exoPlayer.setPlaybackSpeed(speed = speed >= 3 ? 0.75f : speed + 0.25f);
-        return String.valueOf(speed);
+        float addon = speed >= 2 ? 1f : 0.25f;
+        speed = speed >= 5 ? 0.5f : speed + addon;
+        exoPlayer.setPlaybackSpeed(speed);
+        return getSpeed();
     }
 
-    public boolean isIdle() {
-        return exoPlayer.getPlaybackState() == Player.STATE_IDLE;
+    public String getTime(long time) {
+        time = exoPlayer.getCurrentPosition() + time;
+        if (time > exoPlayer.getDuration()) time = exoPlayer.getDuration();
+        else if (time < 0) time = 0;
+        return Util.getStringForTime(builder, formatter, time);
+    }
+
+    public void seekTo(int time) {
+        exoPlayer.seekTo(exoPlayer.getCurrentPosition() + time);
     }
 
     public boolean isPlaying() {
@@ -60,18 +77,25 @@ public class Players implements Player.Listener {
     }
 
     public void setMediaSource(JsonObject object) {
-        HashMap<String, String> headers = new HashMap<>();
         String parse = object.get("parse").getAsString();
         String url = object.get("url").getAsString();
-        if (object.has("header")) {
-            JsonObject header = JsonParser.parseString(object.get("header").getAsString()).getAsJsonObject();
-            for (String key : header.keySet()) headers.put(key, header.get(key).getAsString());
-        }
         if (parse.equals("1")) {
             loadWebView(url);
         } else {
-            setMediaSource(headers, url);
+            setMediaSource(getPlayHeader(object), url);
         }
+    }
+
+    private HashMap<String, String> getPlayHeader(JsonObject object) {
+        HashMap<String, String> headers = new HashMap<>();
+        if (!object.has("header")) return headers;
+        String header = object.get("header").getAsString();
+        JsonElement element = JsonParser.parseString(header);
+        if (element.isJsonObject()) {
+            object = element.getAsJsonObject();
+            for (String key : object.keySet()) headers.put(key, object.get(key).getAsString());
+        }
+        return headers;
     }
 
     private void loadWebView(String url) {
@@ -112,7 +136,16 @@ public class Players implements Player.Listener {
 
     public void release() {
         if (exoPlayer != null) {
+            exoPlayer.removeListener(this);
             exoPlayer.release();
+            exoPlayer = null;
+        }
+        if (webView != null) {
+            webView.destroy();
+            webView = null;
+        }
+        if (handler != null) {
+            handler = null;
         }
     }
 
