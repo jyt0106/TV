@@ -9,26 +9,26 @@ import okhttp3.Request;
 
 public class OKHttp {
 
-    private final OkHttpClient mClient;
+    private final OkHttpClient mOk;
 
     private static class Loader {
         static volatile OKHttp INSTANCE = new OKHttp();
     }
 
-    private static OKHttp get() {
+    public static OKHttp get() {
         return Loader.INSTANCE;
     }
 
     public OKHttp() {
-        mClient = getBuilder().build();
+        mOk = getBuilder().build();
     }
 
     private OkHttpClient.Builder getBuilder() {
-        return new OkHttpClient.Builder().readTimeout(5, TimeUnit.SECONDS).writeTimeout(5, TimeUnit.SECONDS).connectTimeout(5, TimeUnit.SECONDS).retryOnConnectionFailure(true).sslSocketFactory(new SSLSocketFactoryCompat(SSLSocketFactoryCompat.trustAllCert), SSLSocketFactoryCompat.trustAllCert);
+        return new OkHttpClient.Builder().readTimeout(5, TimeUnit.SECONDS).writeTimeout(5, TimeUnit.SECONDS).connectTimeout(5, TimeUnit.SECONDS).sslSocketFactory(new SSLSocketFactoryCompat(SSLSocketFactoryCompat.trustAllCert), SSLSocketFactoryCompat.trustAllCert);
     }
 
     private OkHttpClient client() {
-        return mClient;
+        return mOk;
     }
 
     public static <T> Call newCall(T url) {

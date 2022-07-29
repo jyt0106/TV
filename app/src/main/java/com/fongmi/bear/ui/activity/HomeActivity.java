@@ -22,6 +22,7 @@ import com.fongmi.bear.bean.Vod;
 import com.fongmi.bear.databinding.ActivityHomeBinding;
 import com.fongmi.bear.model.SiteViewModel;
 import com.fongmi.bear.player.Players;
+import com.fongmi.bear.server.Server;
 import com.fongmi.bear.ui.custom.CustomRowPresenter;
 import com.fongmi.bear.ui.custom.CustomSelector;
 import com.fongmi.bear.ui.presenter.FuncPresenter;
@@ -55,6 +56,7 @@ public class HomeActivity extends BaseActivity implements VodPresenter.OnClickLi
     @Override
     protected void initView() {
         Clock.start(mBinding.time);
+        Server.get().start();
         Players.get().init();
         setRecyclerView();
         setViewModel();
@@ -89,7 +91,7 @@ public class HomeActivity extends BaseActivity implements VodPresenter.OnClickLi
             mAdapter.remove("progress");
             if (result == null) return;
             for (List<Vod> items : result.partition()) {
-                VodPresenter presenter = new VodPresenter(items.size());
+                VodPresenter presenter = new VodPresenter(result.getColumns());
                 ArrayObjectAdapter adapter = new ArrayObjectAdapter(presenter);
                 presenter.setOnClickListener(this);
                 adapter.addAll(0, items);
@@ -141,7 +143,10 @@ public class HomeActivity extends BaseActivity implements VodPresenter.OnClickLi
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) getVideo();
+        if (resultCode != RESULT_OK) return;
+        String type = data != null ? data.getStringExtra("type") : "";
+        if (type.equals("thumbnail")) mAdapter.notifyArrayItemRangeChanged(4, mAdapter.size() - 4);
+        else getVideo();
     }
 
     @Override
@@ -157,8 +162,10 @@ public class HomeActivity extends BaseActivity implements VodPresenter.OnClickLi
 
     @Override
     protected void onDestroy() {
+        ApiConfig.get().release();
         Players.get().release();
+        Clock.get().release();
+        Server.get().stop();
         super.onDestroy();
-        Clock.destroy();
     }
 }

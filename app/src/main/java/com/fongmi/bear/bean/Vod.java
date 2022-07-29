@@ -9,8 +9,8 @@ import androidx.annotation.NonNull;
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.amulyakhare.textdrawable.util.ColorGenerator;
 import com.fongmi.bear.R;
+import com.fongmi.bear.utils.ImgUtil;
 import com.fongmi.bear.utils.ResUtil;
-import com.fongmi.bear.utils.Utils;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
@@ -142,7 +142,7 @@ public class Vod {
             String text = getVodName().isEmpty() ? "" : getVodName().substring(0, 1);
             view.setImageDrawable(TextDrawable.builder().buildRect(text, ColorGenerator.MATERIAL.getColor(text)));
         } else {
-            Utils.loadImage(getVodPic(), view);
+            ImgUtil.load(getVodPic(), view);
         }
     }
 
@@ -245,10 +245,6 @@ public class Vod {
 
             public boolean isActivated() {
                 return activated;
-            }
-
-            public void setActivated(boolean activated) {
-                this.activated = activated;
             }
 
             private void deactivated() {

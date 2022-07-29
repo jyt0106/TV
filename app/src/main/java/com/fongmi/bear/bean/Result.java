@@ -65,6 +65,10 @@ public class Result {
         return types == null ? Collections.emptyList() : types;
     }
 
+    public void setTypes(List<Class> types) {
+        this.types = types;
+    }
+
     public List<Vod> getList() {
         return list == null ? Collections.emptyList() : list;
     }
@@ -78,8 +82,11 @@ public class Result {
     }
 
     public List<List<Vod>> partition() {
-        if (getList().size() % 6 == 0) return Lists.partition(getList(), 6);
-        else return Lists.partition(getList(), 5);
+        return Lists.partition(getList(), getColumns());
+    }
+
+    public int getColumns() {
+        return getList().size() % 6 == 0 ? 6 : 5;
     }
 
     @NonNull
