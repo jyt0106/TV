@@ -1,7 +1,7 @@
 <resources xmlns:xliff="http://schemas.android.com/apk/res-auto">
 
     <!-- App -->
-    <string name="app_name">熊爱影视</string>
+    <string name="app_name">影视</string>
     <string name="app_exit">再按一次返回键退出</string>
 
     <!-- Splash -->
@@ -15,6 +15,9 @@
     <string name="home_setting">设定</string>
     <string name="home_recent">最近观看</string>
     <string name="home_recommend">更新推荐</string>
+
+    <!-- Vod -->
+    <string name="vod_last">上次看到<xliff:g name="name">%s</xliff:g></string>
 
     <!-- Detail -->
     <string name="detail_site">站源：<xliff:g name="name">%s</xliff:g></string>
@@ -46,7 +49,6 @@
     <string name="dialog_config_url_hint">请输入配置接口</string>
 
     <!-- Error -->
-    <string name="error_device">仅支援电视</string>
     <string name="error_config_get">配置取得失败</string>
     <string name="error_config_parse">配置解析失败</string>
     <string name="error_play_next">已经是最后一集了！</string>

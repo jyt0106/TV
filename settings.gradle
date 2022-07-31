@@ -14,5 +14,6 @@ dependencyResolutionManagement {
         google()
     }
 }
-rootProject.name = "BearTV"
+rootProject.name = "TV"
 include ':app'
+include ':catvod'
