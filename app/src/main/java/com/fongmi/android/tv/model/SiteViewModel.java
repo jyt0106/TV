@@ -10,8 +10,6 @@ import com.fongmi.android.tv.net.OKHttp;
 import com.fongmi.android.tv.utils.Utils;
 import com.github.catvod.crawler.Spider;
 import com.github.catvod.crawler.SpiderDebug;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,8 +22,8 @@ import okhttp3.HttpUrl;
 
 public class SiteViewModel extends ViewModel {
 
-    public MutableLiveData<JsonObject> player;
     public MutableLiveData<Result> result;
+    public MutableLiveData<Result> player;
     public ExecutorService service;
 
     public SiteViewModel() {
@@ -42,7 +40,7 @@ public class SiteViewModel extends ViewModel {
         execute(result, () -> {
             if (home.getType() == 3) {
                 Spider spider = ApiConfig.get().getCSP(home);
-                String homeContent = spider.homeContent(false);
+                String homeContent = spider.homeContent(true);
                 SpiderDebug.log(homeContent);
                 Result result = Result.fromJson(homeContent);
                 if (result.getList().size() > 0) return result;
@@ -110,29 +108,28 @@ public class SiteViewModel extends ViewModel {
                 Spider spider = ApiConfig.get().getCSP(site);
                 String playerContent = spider.playerContent(flag, id, ApiConfig.get().getFlags());
                 SpiderDebug.log(playerContent);
-                JsonObject object = JsonParser.parseString(playerContent).getAsJsonObject();
-                if (!object.has("flag")) object.addProperty("flag", flag);
-                return object;
+                Result result = Result.objectFrom(playerContent);
+                if (result.getFlag().isEmpty()) result.setFlag(flag);
+                return result;
             } else {
-                JsonObject object = new JsonObject();
-                object.addProperty("url", id);
-                object.addProperty("flag", flag);
-                object.addProperty("playUrl", site.getPlayerUrl());
-                object.addProperty("parse", Utils.isVideoFormat(id) ? "0" : "1");
-                return object;
+                Result result = new Result();
+                result.setUrl(id);
+                result.setFlag(flag);
+                result.setPlayUrl(site.getPlayerUrl());
+                result.setParse(Utils.isVideoFormat(id) ? "0" : "1");
+                return result;
             }
         });
     }
 
-    private <T> void execute(MutableLiveData<T> result, Callable<T> callable) {
+    private void execute(MutableLiveData<Result> result, Callable<Result> callable) {
         if (service != null) service.shutdownNow();
         service = Executors.newFixedThreadPool(2);
         service.execute(() -> {
             try {
                 if (!Thread.interrupted()) result.postValue(service.submit(callable).get(5, TimeUnit.SECONDS));
             } catch (Exception e) {
-                if (!Thread.interrupted()) result.postValue(null);
-                e.printStackTrace();
+                if (!Thread.interrupted()) result.postValue(new Result());
             }
         });
     }

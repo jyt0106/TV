@@ -101,7 +101,7 @@ public class HomeActivity extends BaseActivity implements VodPresenter.OnClickLi
         selector.addPresenter(ListRow.class, new CustomRowPresenter(16), HistoryPresenter.class);
         mBinding.recycler.setVerticalSpacing(ResUtil.dp2px(16));
         mBinding.recycler.setAdapter(new ItemBridgeAdapter(mAdapter = new ArrayObjectAdapter(selector)));
-        mHistoryAdapter = new ArrayObjectAdapter(mHistoryPresenter = new HistoryPresenter(5));
+        mHistoryAdapter = new ArrayObjectAdapter(mHistoryPresenter = new HistoryPresenter());
     }
 
     private void setViewModel() {
@@ -150,9 +150,10 @@ public class HomeActivity extends BaseActivity implements VodPresenter.OnClickLi
     private void getHistory() {
         int historyIndex = getHistoryIndex();
         int recommendIndex = getRecommendIndex();
+        boolean isExist = recommendIndex - historyIndex == 2;
         List<History> items = AppDatabase.get().getHistoryDao().getAll();
-        if (items.isEmpty()) return;
-        if (recommendIndex - historyIndex != 2) mAdapter.add(historyIndex, new ListRow(mHistoryAdapter));
+        if (items.isEmpty() && isExist) mAdapter.removeItems(getHistoryIndex(), 1);
+        if (items.size() > 0 && !isExist) mAdapter.add(historyIndex, new ListRow(mHistoryAdapter));
         mHistoryAdapter.setItems(items, null);
     }
 

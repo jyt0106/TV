@@ -7,6 +7,9 @@ import androidx.annotation.NonNull;
 
 import com.fongmi.android.tv.App;
 import com.fongmi.android.tv.R;
+import com.fongmi.android.tv.bean.History;
+import com.fongmi.android.tv.bean.Result;
+import com.fongmi.android.tv.db.AppDatabase;
 import com.fongmi.android.tv.event.PlayerEvent;
 import com.fongmi.android.tv.ui.custom.CustomWebView;
 import com.fongmi.android.tv.utils.ResUtil;
@@ -32,6 +35,7 @@ public class Players implements Player.Listener {
     private Formatter formatter;
     private ExoPlayer exoPlayer;
     private Handler handler;
+    private String key;
 
     private static class Loader {
         static volatile Players INSTANCE = new Players();
@@ -52,6 +56,14 @@ public class Players implements Player.Listener {
 
     public ExoPlayer exo() {
         return exoPlayer;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public String getSpeed() {
@@ -89,23 +101,20 @@ public class Players implements Player.Listener {
         return exoPlayer.isPlaying();
     }
 
-    public void setMediaSource(JsonObject object) {
-        String parse = object.get("parse").getAsString();
-        String url = object.get("url").getAsString();
-        if (parse.equals("1")) {
-            loadWebView(url);
+    public void setMediaSource(Result result) {
+        if (result.getParse().equals("1")) {
+            loadWebView(result.getUrl());
         } else {
-            setMediaSource(getPlayHeader(object), url);
+            setMediaSource(getPlayHeader(result), result.getUrl());
         }
     }
 
-    private HashMap<String, String> getPlayHeader(JsonObject object) {
+    private HashMap<String, String> getPlayHeader(Result result) {
         HashMap<String, String> headers = new HashMap<>();
-        if (!object.has("header")) return headers;
-        String header = object.get("header").getAsString();
-        JsonElement element = JsonParser.parseString(header);
+        if (result.getHeader().isEmpty()) return headers;
+        JsonElement element = JsonParser.parseString(result.getHeader());
         if (element.isJsonObject()) {
-            object = element.getAsJsonObject();
+            JsonObject object = element.getAsJsonObject();
             for (String key : object.keySet()) headers.put(key, object.get(key).getAsString());
         }
         return headers;
@@ -129,7 +138,9 @@ public class Players implements Player.Listener {
     }
 
     private void checkPosition() {
-
+        History history = AppDatabase.get().getHistoryDao().find(getKey());
+        if (history == null) return;
+        seekTo(history.getDuration());
     }
 
     public void pause() {

@@ -1,56 +1,56 @@
 package com.fongmi.android.tv.utils;
 
 import android.graphics.drawable.Drawable;
-import android.text.TextUtils;
 import android.widget.ImageView;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.amulyakhare.textdrawable.util.ColorGenerator;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.transition.Transition;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.ObjectKey;
 import com.fongmi.android.tv.App;
 import com.fongmi.android.tv.R;
 
 public class ImgUtil {
 
-    public static void load(String vodName, String vodPic, ImageView view) {
-        if (TextUtils.isEmpty(vodPic)) {
-            String text = vodName.isEmpty() ? "" : vodName.substring(0, 1);
-            view.setImageDrawable(TextDrawable.builder().buildRect(text, ColorGenerator.MATERIAL.getColor(text)));
-        } else {
-            ImgUtil.load(vodPic, view);
-        }
-    }
-
     public static void load(String url, ImageView view) {
-        float thumbnail = 1 - Prefers.getThumbnail() * 0.3f;
-        Glide.with(App.get()).load(url).thumbnail(thumbnail).signature(new ObjectKey(url + "_" + thumbnail)).placeholder(R.drawable.ic_img_loading).into(customTarget(view));
+        Glide.with(App.get()).load(url).error(R.drawable.ic_img_error).placeholder(R.drawable.ic_img_loading).into(view);
     }
 
-    private static CustomTarget<Drawable> customTarget(ImageView view) {
-        return new CustomTarget<>() {
+    public static void load(String vodName, String vodPic, ImageView view) {
+        float thumbnail = 1 - Prefers.getThumbnail() * 0.3f;
+        Glide.with(App.get()).load(vodPic).sizeMultiplier(thumbnail).signature(new ObjectKey(vodPic + "_" + thumbnail)).placeholder(R.drawable.ic_img_loading).listener(getListener(vodName, view)).into(view);
+    }
+
+    private static RequestListener<Drawable> getListener(String vodName, ImageView view) {
+        return new RequestListener<>() {
             @Override
-            public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                view.setScaleType(ImageView.ScaleType.CENTER);
-                view.setImageResource(R.drawable.ic_img_error);
+            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                ImgUtil.onLoadFailed(vodName, view);
+                return true;
             }
 
             @Override
-            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                 view.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                view.setImageDrawable(resource);
-            }
-
-            @Override
-            public void onLoadCleared(@Nullable Drawable placeholder) {
-                view.setScaleType(ImageView.ScaleType.CENTER);
-                view.setImageDrawable(null);
+                return false;
             }
         };
+    }
+
+    private static void onLoadFailed(String vodName, ImageView view) {
+        String text = vodName.isEmpty() ? "" : vodName.substring(0, 1);
+        if (text.isEmpty()) {
+            view.setImageResource(R.drawable.ic_img_error);
+            view.setScaleType(ImageView.ScaleType.CENTER);
+        } else {
+            view.setImageDrawable(TextDrawable.builder().buildRect(text, ColorGenerator.MATERIAL.getColor(text)));
+            view.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        }
     }
 }
