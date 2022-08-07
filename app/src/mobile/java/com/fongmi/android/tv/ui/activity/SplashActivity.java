@@ -7,7 +7,7 @@ import android.view.View;
 
 import androidx.viewbinding.ViewBinding;
 
-import com.fongmi.android.tv.ApiConfig;
+import com.fongmi.android.tv.api.ApiConfig;
 import com.fongmi.android.tv.databinding.ActivitySplashBinding;
 import com.fongmi.android.tv.net.Callback;
 
